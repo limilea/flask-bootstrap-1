@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = b'khiopgfdfghj;oioiouiy'
+# app.secret_key = b'khiopgfdfghj;oioiouiy'
 
 cars = [
   {'id':1, 'brand':'Toyota', 'model':'Yaris Ativ', 'year':2024, 'price': 560000},
@@ -27,11 +29,52 @@ def new_car():
     price = int(request.form['price'])
 
     length = len(cars)
-    id = cars[length-1]['id'] + 1
+    if length != 0:
+      id = cars[length-1]['id'] + 1
+    else:
+      id = 1
     car = {'id':id, 'brand':brand, 'model':model, 'year':year, 'price': price}
 
     cars.append(car)
+    flash('Add new car successfully', 'success')
     return redirect(url_for('show_cars'))
   
   return render_template('cars/new_car.html',
                          title='New Car Page')
+
+@app.route('/cars/<int:id>/delete')
+def delete_car(id):
+  for car in cars:
+    if id == car['id']:
+      cars.remove(car)
+      break
+  
+  flash('Delete car successfully', 'success')
+  return redirect(url_for('show_cars'))
+
+@app.route('/cars/<int:id>/edit', methods=['GET', 'POST'])
+def edit_car(id):
+  for c in cars:
+    if id == c['id']:
+      car = c 
+      break
+  if request.method == 'POST':
+    brand = request.form['brand']
+    model = request.form['model']
+    year = int(request.form['year'])
+    price = int(request.form['price'])
+
+    for car in cars:
+      if id == car['id']:
+        car['brand'] = brand
+        car['model'] = model
+        car['year'] = year
+        car['price'] = price
+        break
+
+    flash('Update car successfully', 'success')
+    return redirect(url_for('show_cars'))
+  
+  return render_template('cars/edit_car.html',
+                         title='Edit Car Page',
+                         car=car)
