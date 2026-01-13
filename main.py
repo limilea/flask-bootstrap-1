@@ -14,8 +14,20 @@ cars = [
 def index():
   return render_template('index.html', title='Home Page')
 
-@app.route('/cars')
+@app.route('/cars', methods=['GET', 'POST'])
 def show_cars():
+  if request.method == 'POST':
+    brand = request.form['brand']
+    # print(brand)
+    tmp_cars = []
+    for car in cars:
+      # print(car)
+      if brand in car['brand']:
+        tmp_cars.append(car)
+    return render_template('cars/cars.html',
+                         title='Show Cars by Brand Page',
+                         cars=tmp_cars)
+  
   return render_template('cars/cars.html',
                          title='Show All Cars Page',
                          cars=cars)
